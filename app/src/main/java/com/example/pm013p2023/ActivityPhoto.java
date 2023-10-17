@@ -10,6 +10,8 @@ import androidx.core.content.FileProvider;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -26,6 +28,7 @@ import java.util.Date;
 public class ActivityPhoto extends AppCompatActivity {
     static final  int peticion_acceso_camara=101;
     static final  int peticion_toma_fotografia=102;
+    String currentPhotoPath;
 
 
     ImageView imageView;
@@ -52,7 +55,8 @@ public class ActivityPhoto extends AppCompatActivity {
       if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
           ActivityCompat.requestPermissions(this,new String[]{ Manifest.permission.CAMERA},peticion_acceso_camara);
       }else{
-          Tomarfoto();
+          //Tomarfoto();
+          dispatchTakePictureIntent();
       }
     }
 
@@ -74,6 +78,19 @@ public class ActivityPhoto extends AppCompatActivity {
     if(intent.resolveActivity(getPackageManager())!=null){
           startActivityForResult(intent,peticion_toma_fotografia);
     }
+
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==peticion_toma_fotografia && resultCode==RESULT_OK){
+            Bundle extras=data.getExtras();
+            Bitmap image=(Bitmap) extras.get("data");
+            imageView.setImageBitmap(image);
+        }
 
     }
 
@@ -108,7 +125,7 @@ public class ActivityPhoto extends AppCompatActivity {
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.pmo120232p.fileprovider",
+                        "com.example.pm013p2023.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, peticion_toma_fotografia);
@@ -117,9 +134,5 @@ public class ActivityPhoto extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-    }
 }
